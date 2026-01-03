@@ -4,37 +4,41 @@
      <meta charset="UTF-8">
      <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <title>Document</title>
-     <link rel="stylesheet" href="./style.css">
+     <link rel="stylesheet" href="./style.css" />
+     <script src="https://kit.fontawesome.com/392ee53866.js" crossorigin="anonymous"></script>
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-3.2.8.min.css" /> 
 </head>
 <body>
      
      <div class="flex-wrapper">
           <div class="header">
                <div class="score-container" id="playerScore">
-                    <p>Player 1 Score</p>
-                    <h1></h1>
+                    <p>YOUR SCORE</p>
+                    <h1>0</h1>
                </div>
                <img src="./images/logo-bonus.svg" alt="Logo">
                <div class="score-container" id="computerScore">
-                    <p>Player 2 Score</p>
-                    <h1></h1>
+                    <p>OPPONENT SCORE</p>
+                    <h1>0</h1>
                </div>
           </div>
 
           <div class="modeSelection" id="modeContainer">
-               <h1>Mode Selection</h1>
-               <div class="modes">
-                    <button id="onePlayerMode">Player VS Computer</button>
-                    <button id="twoPlayerMode">Player VS Player</button>
-               </div>
-               <div id="rooms">
-                    <div>
-                         <input type="text" class="room-box" id="create-room-input" disabled>
-                         <button id="create-btn">Create Room</button>
+               <h1>CHOOSE YOUR MODE</h1>
+               <div id="mode-wrapper">
+                    <div class="modes">
+                         <h1>SINGLE PLAYER</h1>
+                         <button id="onePlayerMode">PLAY</button>
                     </div>
-                    <div>
-                         <input type="text" class="room-box" id="join-room-input" placeholder="Enter Room Name">
-                         <button id="join-btn">Join Room</button>
+                    <div id="rooms">
+                         <h1>MULTIPLAYER</h1>
+                         <div>
+                              <input type="number" class="room-box" id="join-room-input" placeholder="Enter Room Number" maxlength="5" />
+                              <button id="join-btn">JOIN ROOM</button>
+                         </div>
+                         <div>
+                              <button id="create-btn">CREATE NEW ROOM</button>
+                         </div>
                     </div>
                </div>
                <!-- <div class="modeImage">
@@ -44,6 +48,7 @@
           </div>
 
           <div id="outputContainer">
+               <div id="roomName"></div>
                <div id="playerOneOutputContainer">
                     <div id="outputSelection1">
                          <div class="rock">
@@ -62,43 +67,84 @@
                               <img src="./images/icon-spock.svg" alt="Image" />
                          </div>
                     </div>
-                    <div id="outputPlayer1">
-                         
+                    <div id="outputPlayers">
+                         <div>
+                              <div id="outputPlayer1"></div>
+                         </div>
+                         <div>
+                              <div id="outputComputer"></div>
+                         </div>
                     </div>
+               </div>
+               <div id="loader-container">
+                    <section id="dots-container">
+                         <div class="dot"></div>
+                         <div class="dot"></div>
+                         <div class="dot"></div>
+                         <div class="dot"></div>
+                         <div class="dot"></div>
+                    </section>
+                    <div id="loading-message">Waiting for opponent's Selection!</div>
                </div>
                <div id="output">
 
                </div>
-               <!-- <div id="playerTwoOutputContainer">
-                    <div id="outputPlayer2">
-                         
-                    </div>
-                    <div id="outputSelection2">
-                         <div class="rock">
-                              <img src="./images/icon-rock.svg" alt="Image" />
-                         </div>
-                         <div class="paper">
-                              <img src="./images/icon-paper.svg" alt="Image" />
-                         </div>
-                         <div class="scissors">
-                              <img src="./images/icon-scissors.svg" alt="Image" />
-                         </div>
-                         <div class="lizard">
-                              <img src="./images/icon-lizard.svg" alt="Image" />
-                         </div>
-                         <div class="spock">
-                              <img src="./images/icon-spock.svg" alt="Image" />
-                         </div>
-                    </div>
-               </div> -->
           </div>
 
           <div id="restart">
                <button id="restart-btn">Restart Game</button>
-               <button id="exit-btn">Exit Game</button>
+               <button id="exit-btn"></button>
           </div>
      </div>
 
+     <script src="https://cdn.jsdelivr.net/npm/notiflix@3/dist/notiflix-3.2.8.min.js"></script>
+     <script>
+          // Initialize Notiflix
+          Notiflix.Notify.init({
+            width: "280px",
+            position: "center-top",
+            distance: "30px",
+            opacity: 1,
+            borderRadius: "6px",
+            timeout: 3000,
+            messageMaxLength: 200,
+            clickToClose: true,
+            pauseOnHover: true,
+            cssAnimation: true,
+            cssAnimationStyle: "from-top",
+            cssAnimationDuration: 600,
+            useIcon: true,
+            useFontAwesome: true,
+            fontAwesomeIconStyle: "solid",
+            fontAwesomeIconSize: "28px",
+            fontSize : "18px",
+            FontFamily : "Geom, sans-serif",
+            success: {
+              background: "#fff",
+              textColor: "#000",
+              fontAwesomeClassName: "fa-solid fa-circle-check fa-fade",
+              fontAwesomeIconColor: "#79D050",
+            },
+            failure: {
+              background: "#fff",
+              textColor: "#000",
+              fontAwesomeClassName: "fa-solid fa-circle-xmark fa-fade",
+              fontAwesomeIconColor: "#ff0000",
+            },
+            warning: {
+              background: "#fff",
+              textColor: "#000",
+              fontAwesomeClassName: "fa-solid fa-triangle-exclamation fa-fade",
+              fontAwesomeIconColor: "#FFD43B",
+            },
+            info: {
+              background: "#fff",
+              textColor: "#000",
+              fontAwesomeClassName: "fa-solid fa-circle-info fa-fade",
+              fontAwesomeIconColor: "#0091ff",
+            }
+          });
+     </script>
      <script src="/socket.io/socket.io.js"></script>
      <script src="./script.js"></script>
 </body>

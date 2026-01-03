@@ -1,61 +1,77 @@
 let oneplayerMode = document.getElementById("onePlayerMode");
-let twoPlayerMode = document.getElementById("twoPlayerMode");
 let modeContainer = document.getElementById("modeContainer");
 let outputContainer = document.getElementById("outputContainer");
 let outputPlayer1 = document.getElementById("outputPlayer1");
-// let outputPlayer2 = document.getElementById("outputPlayer2");
 let finalOutput = document.getElementById("output");
 let restart = document.getElementById("restart");
 let restartBtn = document.getElementById("restart-btn");
 let exitBtn = document.getElementById("exit-btn");
+let outputSelection = document.getElementById("outputSelection1");
+
 
 // Socket Buttons
 let createRoom = document.getElementById("create-btn");
 let joinRoom = document.getElementById("join-btn");
-let createRoomInput = document.getElementById("create-room-input");
 let joinRoomInput = document.getElementById("join-room-input");
+let roomContainer = document.getElementById("roomName");
 
 
-let choices = ["rock", "paper", "scissors", "lizard", "spock"];
-
-let mode = 0;
 let player1Score = 0;
 let player2Score = 0;
-
-let playerOneInput = '';
-let playerTwoInput = '';
-
 let player1Choice = "";
-let player2Choice = "";
+let mode = 0;
+let choices = ["rock", "paper", "scissors", "lizard", "spock"];
+
 
 const clientSocket = io();
 let roomName = "";
 
 
 // Socket
+// Create Room
 createRoom.addEventListener("click", () => {
+     roomName = "";
+
      for(let i = 0; i < 5; i++){
           roomName += Math.floor(Math.random() * 5) * 1;
      }
 
-     createRoomInput.value = roomName;
-     createRoomInput.style.opacity = 1;
-
-     clientSocket.emit("joinRoom", roomName);
+     joinUserRoom();
 });
+// Join Room
 joinRoom.addEventListener("click", () => {
      if(!joinRoomInput.value || joinRoomInput.value.length !== 5){
+          Notiflix.Notify.failure("Invalid Room Number!!");
           return;
      }
-
      roomName = joinRoomInput.value;
+
+     joinUserRoom();
+});
+// Joining Socket
+function joinUserRoom(){
+     mode = 2;
      
+     roomContainer.innerText = "ROOM CODE : " + roomName;
+     clientSocket.emit("joinRoom", roomName);
+}
+// Leaving Socket
+function leaveRoom(){
+     clientSocket.emit("leaveRoom", roomName);
+     Notiflix.Notify.failure("Left a Room!");
+}
+// Afteer Joined
+clientSocket.on("roomJoined", (room) => {
      modeContainer.style.display = "none";
      outputContainer.style.display = "flex";
      restart.style.display = "flex";
+     document.getElementById("outputComputer").style.display = "none";
+     exitBtn.innerText = "Leave Room";
 
-     clientSocket.emit("joinRoom", roomName);
+     roomName = room;
+     Notiflix.Notify.success("Joined a Room!");
 });
+// Validate result
 clientSocket.on("checkResult", ({ player1, player2, result }) => {
      outputPlayer1.innerHTML = "";
 
@@ -71,65 +87,24 @@ clientSocket.on("checkResult", ({ player1, player2, result }) => {
          finalOutput.style.color = "red";
          finalOutput.innerText = "You Lose";
      }
+
+     calculatePlayerScore(result, clientSocket.id === player1);
+     outputSelection.addEventListener("click", userSelect);
+     document.getElementById("loader-container").style.display = "none";
 });
+clientSocket.on("roomFull", () => {
+     console.log("Room Full!");
+     roomName = "";
 
-let input1 = document.querySelector("#outputSelection1");     
-input1.addEventListener("click", twoPlayer1);
-
-// One Player Mode
-oneplayerMode.addEventListener("click", () => {
-     mode = 1;
-
-     modeContainer.style.display = "none";
-     outputContainer.style.display = "flex";
-     restart.style.display = "flex";
-
-     let ele = document.querySelector("#outputSelection1");
-
-     // console.log(ele);
-
-     ele.addEventListener("click", onePlayer);
-
+     Notiflix.Notify.failure("Room Full!");
 });
-function onePlayer(e){
-     outputPlayer1.innerText = "";
-     let sendTo = "";
-     let player1Choic = '';
+clientSocket.on("roomNotFound", () => {
+     Notiflix.Notify.failure("Room Not Found!");
+})
+   
+outputSelection.addEventListener("click", userSelect);
 
-     if(e.target.tagName === "IMG"){
-          sendTo = e.target.parentElement;
-          player1Choic = e.target.parentElement.className;
-     }
-     else if(e.target.className === "rock" || e.target.className === "paper" || e.target.className === "scissors" || e.target.className === "lizard" || e.target.className === "spock"){
-          sendTo = e.target;
-          player1Choic = e.target.className;
-     } else {
-          return;
-     }
-
-     // console.log(player1Choic);
-     outputPlayer1.append(sendTo.cloneNode(true));
-     playerVSComputer(player1Choic);
-}
-
-
-
-// Two Player Mode
-twoPlayerMode.addEventListener("click", () => {
-     mode = 2;
-
-     modeContainer.style.display = "none";
-     outputContainer.style.display = "flex";
-     restart.style.display = "flex";
-
-     // let input1 = document.querySelector("#outputSelection1");
-     // let input2 = document.querySelector("#outputSelection2");
-     
-     // input1.addEventListener("click", twoPlayer1);
-     // input2.addEventListener("click", twoPlayer2);
-     
-});
-function twoPlayer1(e) {
+function userSelect(e) {
      outputPlayer1.innerText = "";
      finalOutput.innerText = '';
      player1Choice = '';
@@ -147,170 +122,135 @@ function twoPlayer1(e) {
      } else {
           return;
      }
+
      player1Choice = choiceDiv.className;
 
-     // console.log(player1Choice);
-     clientSocket.emit("action", {
-         value: player1Choice,
-         roomName
-     });
-
-     outputPlayer1.append(sendTo.cloneNode(true));
+     if(mode === 1){
+          outputPlayer1.append(sendTo.cloneNode(true));
+          calculateSinglePlayerResult(player1Choice);
+     } else if(mode === 2){
+          // console.log(player1Choice);
+          clientSocket.emit("action", {
+              value: player1Choice,
+              roomName
+          });
+     
+          outputSelection.removeEventListener("click", userSelect);
+          document.getElementById("loader-container").style.display = "flex";
+          outputPlayer1.append(sendTo.cloneNode(true));
+     }
 }
-// function twoPlayer2 (e){
-//      outputPlayer2.innerText = "";
-//      finalOutput.innerText = '';
-//      player2Choice = '';
-//      let sendTo = "";
+function calculatePlayerScore(result, isPlayer1){
+     if(result === "draw"){
+          return;
+     };
+ 
+     if((result === "player1" && isPlayer1) || (result === "player2" && !isPlayer1)){
+         player1Score += 1;
+     } else {
+         player2Score += 1;
+     }
+ 
+     document.getElementById("playerScore").querySelector("h1").innerText = player1Score;
+     document.getElementById("computerScore").querySelector("h1").innerText = player2Score;
+} 
+function calculateSinglePlayerResult(playerInput){
+     let computerInput = choices[Math.floor(Math.random() * ((choices.length) - 0) + 0)];
 
-//      if(e.target.tagName === "IMG"){
-//           sendTo = e.target.parentElement;
-//           player2Choice = e.target.parentElement.className;
-//      }
-//      else if(e.target.className === "rock" || e.target.className === "paper" || e.target.className === "scissors" || e.target.className === "lizard" || e.target.className === "spock"){
-//           sendTo = e.target;
-//           player2Choice = e.target.className;
-//      } else {
-//           return;
-//      }
-//      outputPlayer2.append(sendTo.cloneNode(true));
-// }
+     let ele = document.querySelector("#outputSelection1");
+     document.getElementById("outputComputer").innerHTML = "";
 
-
-// Result
-const checkResult = (playerOneInput, playerTwoInput) => {
-
-     // console.log(playerOneInput, playerTwoInput);
-
+     ele.querySelectorAll("div").forEach(ele => {
+          if(ele.className === computerInput){
+               document.getElementById("outputComputer").append(ele.cloneNode(true));
+          }
+     })
 
      finalOutput.style.color = "deepskyblue";
-
-     if(playerOneInput === playerTwoInput){
+     
+     if(playerInput === computerInput){
           finalOutput.style.color = "#ffaa00";
           finalOutput.innerText = "Draw !!";
-     } else if(playerOneInput === "rock" && (playerTwoInput === "scissors" || playerTwoInput === "lizard")){
-          if(mode === 1){
-               finalOutput.innerText = "You Won !!";
-               player1Score += 1;
-          } else {
-               finalOutput.innerText = "Player 1 Wins";
-               player1Score += 1;
-          }
-     } else if(playerOneInput === "paper" && (playerTwoInput === "rock" || playerTwoInput === "spock")){
-          if(mode === 1){
-               finalOutput.innerText = "You Won !!";
-               player1Score += 1;
-          } else {
-               finalOutput.innerText = "Player 1 Wins";
-               player1Score += 1;
-          }
-     } else if(playerOneInput === "scissors" && (playerTwoInput === "paper" || playerTwoInput === "lizard")){
-          if(mode === 1){
-               finalOutput.innerText = "You Won !!";
-               player1Score += 1;
-          } else {
-               finalOutput.innerText = "Player 1 Wins";
-               player1Score += 1;
-          }
-     } else if(playerOneInput === "lizard" && (playerTwoInput === "paper" || playerTwoInput === "spock")){
-          if(mode === 1){
-               finalOutput.innerText = "You Won !!";
-               player1Score += 1;
-          } else {
-               finalOutput.innerText = "Player 1 Wins";
-               player1Score += 1;
-          }
-     } else if(playerOneInput === "spock" && (playerTwoInput === "scissors" || playerTwoInput === "rock")){
-          if(mode === 1){
-               finalOutput.innerText = "You Won !!";
-               player1Score += 1;
-          } else {
-               finalOutput.innerText = "Player 1 Wins";
-               player1Score += 1;
-          }
+     } else if(playerInput === "rock" && (computerInput === "scissors" || computerInput === "lizard")){
+          finalOutput.innerText = "You Won !!";
+          player1Score += 1;
+     } else if(playerInput === "paper" && (computerInput === "rock" || computerInput === "spock")){
+          finalOutput.innerText = "You Won !!";
+          player1Score += 1;
+     } else if(playerInput === "scissors" && (computerInput === "paper" || computerInput === "lizard")){
+          finalOutput.innerText = "You Won !!";
+          player1Score += 1;
+     } else if(playerInput === "lizard" && (computerInput === "paper" || computerInput === "spock")){
+          finalOutput.innerText = "You Won !!";
+          player1Score += 1;
+     } else if(playerInput === "spock" && (computerInput === "scissors" || computerInput === "rock")){
+          finalOutput.innerText = "You Won !!";
+          player1Score += 1;
      } else {
-          if(mode === 1){
-               finalOutput.style.color = "red";
-               finalOutput.innerHTML = "You Lose !!";
-               player2Score += 1;
-          } else {
-               finalOutput.innerText = "Player 2 Wins";
-               player2Score += 1;
-          }
+          finalOutput.style.color = "red";
+          finalOutput.innerHTML = "You Lose !!";
+          player2Score += 1;
      }
-
-     // console.log(player1Score, player2Score);
 
      document.getElementById("playerScore").querySelector("h1").innerText = player1Score;
      document.getElementById("computerScore").querySelector("h1").innerText = player2Score;
 }
 
-// Choices
-// const playerVSComputer = (player1Choice) => {
-//      // console.log(player1Choice);
-//      playerOneInput = player1Choice;
-//      playerTwoInput = choices[Math.floor(Math.random() * ((choices.length) - 0) + 0)];
 
-//      let ele = document.querySelector("#outputSelection2");
-
-//      outputPlayer2.innerText = '';
-//      ele.querySelectorAll("div").forEach(ele => {
-//           if(ele.className === playerTwoInput){
-//                outputPlayer2.append(ele.cloneNode(true));
-//           }
-//      });
-
-//      console.log("Player VS Comp");
-//      checkResult(playerOneInput, playerTwoInput);
-// }
-
-
-const playerVSPlayer = (player1Choice, player2Choice) => {
-     playerOneInput = player1Choice;
-     playerTwoInput = player2Choice;
-
-     checkResult(playerOneInput, playerTwoInput);
-}
-
+// Single Player Mode
+oneplayerMode.addEventListener("click", () => {
+     modeContainer.style.display = "none";
+     outputContainer.style.display = "flex";
+     restart.style.display = "flex";
+     roomContainer.innerText = "SINGLE PLAYER MODE";
+     mode = 1;
+     document.getElementById("playerOneOutputContainer").style.flexDirection = "column";
+     document.getElementById("outputComputer").style.display = "flex";
+     outputSelection.addEventListener("click", userSelect);
+     Notiflix.Notify.success("Match Started!");
+     exitBtn.innerText = "Exit Game";
+});
 
 
 // Button Actions
 restartBtn.addEventListener("click", () => {
+     if(mode === 2){
+          leaveRoom();
+          joinUserRoom();
+     }
+
      player1Score = 0;
      player2Score = 0;
+     outputPlayer1.innerHTML = "";
+     finalOutput.innerText = "";
+     document.getElementById("outputComputer").innerHTML = "";
+     
 
-     document.getElementById("playerScore").querySelector("h1").innerText = '';
-     document.getElementById("computerScore").querySelector("h1").innerText = '';
-     finalOutput.innerText = '';
-     outputPlayer1.innerText = '';
-     // outputPlayer2.innerText = '';
+     document.getElementById("playerScore").querySelector("h1").innerText = player1Score;
+     document.getElementById("computerScore").querySelector("h1").innerText = player2Score;
 });
 
 
 exitBtn.addEventListener("click", () => {
+     leaveRoom();
+
 
      player1Score = 0;
      player2Score = 0;
+     mode = 0;
 
      document.getElementById("playerScore").querySelector("h1").innerText = '';
      document.getElementById("computerScore").querySelector("h1").innerText = '';
+     
      finalOutput.innerText = '';
      outputPlayer1.innerText = '';
-     // outputPlayer2.innerText = '';
-     playerOneInput = '';
-     playerTwoInput = '';
      player1Choice = '';
-     player2Choice = '';
      
 
      outputContainer.style.display = "none";
      modeContainer.style.display = "flex";
      restart.style.display = "none";
 
-     let player1Remove = document.querySelector("#outputSelection1");
-     player1Remove.removeEventListener("click", onePlayer);
-
-     let player2Remove = document.querySelector("#outputSelection2");
-     player2Remove.removeEventListener("click", twoPlayer1);
-     player2Remove.removeEventListener("click", twoPlayer2);
+     outputSelection.removeEventListener("click", userSelect);
+     document.getElementById("outputComputer").innerHTML = "";
 });

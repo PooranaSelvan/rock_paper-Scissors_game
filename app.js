@@ -26,13 +26,20 @@ io.on("connection", (socket) => {
      });
 
      socket.on("joinRoom", (room) => {
+          // if(!(io.sockets.adapter.rooms.has(room))){
+          //      socket.emit("roomNotFound");
+          //      return;
+          // }
+          
+          socket.join(room);
           const roomSize = io.sockets.adapter.rooms.get(room)?.size || 0;
-        
-          if (roomSize < 2) {
-            socket.join(room);
-            console.log(`${socket.id} joined room ${room}`);
+
+          if (roomSize > 2) {
+               socket.leave(room); 
+               socket.emit("roomFull");
           } else {
-            socket.emit("roomFull");
+               console.log(`${socket.id} joined room ${room}`);
+               socket.emit("roomJoined", room);
           }
      });        
 
@@ -40,6 +47,7 @@ io.on("connection", (socket) => {
           let rooms = io.sockets.adapter.rooms;
 
           if(!rooms.has(roomName)){
+               socket.emit("roomNotFound");
                console.log("Room Not Found!");
                return;
           }
@@ -53,7 +61,7 @@ io.on("connection", (socket) => {
                value
           });
 
-          console.log(roomValues[roomName][0]);
+          // console.log(roomValues[roomName][0]);
 
           if(roomValues[roomName].length === 2){
                let result = checkResult(roomValues[roomName][0], roomValues[roomName][1]);
@@ -68,8 +76,8 @@ io.on("connection", (socket) => {
           }
      });
 
-     socket.on("leaveRoom", (room) => {
-          socket.leave(room);
+     socket.on("leaveRoom", (roomName) => {
+          socket.leave(roomName);
      });
 });
 

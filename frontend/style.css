@@ -44,7 +44,7 @@ button{
      align-items: center;
      justify-content: center;
      flex-direction: column;
-     background-color: white;
+     background-color: #EEF0FF;
      color: #151231;
      height: 100%;
      padding: 40px 30px;
@@ -65,6 +65,7 @@ button{
      flex-direction: column;
      gap: 10px;
      margin-top: 30px; 
+     color: black;
 }
 #rooms div {
      display: flex;
@@ -73,26 +74,25 @@ button{
      gap: 10px;
 }
 #create-btn {
+     width: 370px;
      background-color: rgb(255, 145, 0);
      color: white;
 }
 #join-btn {
-     background-color: white;
-     color: black;
+     background-color: rgb(103, 199, 0);
+     color: white;
      padding: 15px 40px;
 }
 .room-box {
      padding: 15px 20px;
      width: 200px;
-     border: none;
+     border: 1px solid black;
      border-radius: 5px;
-}
-#create-room-input {
-     background: transparent;
-     border: 5px dashed white;
-     opacity: 0;
-     color: white;
      font-size: 16px;
+     font-weight: 600;
+}
+.room-box:active {
+     border: 3px solid black;
 }
 
 /* Mode Selection */
@@ -103,27 +103,27 @@ button{
      justify-content: center;
      flex-direction: column;
      gap: 30px;
+     width: 100%;
+     margin-top: 80px;
 }
 .modes{
      display: flex;
      flex-wrap: wrap;
      align-items: center;
      justify-content: center;
+     flex-direction: column;
      gap: 30px;
-}
-#onePlayerMode:hover, #twoPlayerMode:hover{
-     background-color: white;
      color: black;
 }
 #onePlayerMode{
-     background-color: rgb(0, 212, 39);
+     background-color: #4F46E5;
      color: white;
 }
 #twoPlayerMode{
      background-color: deepskyblue;
      color: white;
-     opacity: 0;
 }
+
 .modeImage{
      display: flex;
      flex-wrap: wrap;
@@ -145,7 +145,20 @@ button{
      height: 400px;
      width: 400px;
 }
-
+#mode-wrapper {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: space-evenly;
+     gap: 20px;
+     width: 80%;
+     margin-top: 50px;
+}
+#mode-wrapper > div{
+     background-color: #EEF0FF;
+     padding: 50px;
+     border-radius: 5px;
+}
 
 
 /* Output Container */
@@ -158,14 +171,14 @@ button{
      width: 70%;
      gap: 30px;
 }
-#playerOneOutputContainer, #playerTwoOutputContainer{
+#playerOneOutputContainer{
      display: flex;
      flex-wrap: wrap;
      align-items: center;
      justify-content: center;
      gap: 30px;
 }
-#outputSelection1{
+#outputSelection1, #outputComputer{
      display: flex;
      flex-wrap: wrap;
      align-items: center;
@@ -175,10 +188,28 @@ button{
      padding: 30px;
      border-radius: 8px;
 }
-#outputPlayer1 , #outputPlayer2{
+#outputPlayer1{
      background-color: #272151;
      padding: 30px;
      border-radius: 8px;
+}
+#outputComputer {
+     display: none;
+}
+#outputPlayers {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     gap: 20px;    
+}
+#outputPlayers > div {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+     gap: 20px; 
 }
 .rock, .paper, .scissors, .lizard, .spock{
      display: flex;
@@ -194,7 +225,7 @@ button{
      transition: all 0.3s ease-in-out;
 }
 .rock:hover, .paper:hover, .scissors:hover, .lizard:hover, .spock:hover{
-     transform: scale(1.1);
+     transform: scale(1.1) rotate(20deg);
 }
 .rock{
      border-color: red;
@@ -212,12 +243,13 @@ button{
      border-color: #59e6ff;
 }
 #output{
-     background-color: white;
+     background-color: #EEF0FF;
      color: #151231;
      padding: 50px;
      font-size: 35px;
      font-weight: 550;
      letter-spacing: 0.3px;
+     border-radius: 5px;
 }
 #restart{
      display: none;
@@ -247,4 +279,69 @@ button{
      transition: all 0.3s ease-in-out;
      font-family: 550;
      letter-spacing: 1px;
+}
+
+/* Room Name */
+#roomName {
+     padding: 10px 20px;
+     border-radius: 3px;
+     background-color: #E9EBFF;
+     color: #151231;
+     font-size: 18px;
+}
+
+
+/* Loader */
+#loader-container {
+     display: none;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+     gap: 20px;
+}
+#dots-container {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     height: 100%;
+     width: 100%;
+} 
+.dot {
+     height: 20px;
+     width: 20px;
+     margin-right: 10px;
+     border-radius: 10px;
+     background-color: #ffffff;
+     animation: pulse 1.5s infinite ease-in-out;
+}
+.dot:last-child {
+  margin-right: 0;
+}
+.dot:nth-child(1) {
+  animation-delay: -0.3s;
+}
+.dot:nth-child(2) {
+  animation-delay: -0.1s;
+}
+.dot:nth-child(3) {
+  animation-delay: 0.1s;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    background-color: #d0d0d0;
+    box-shadow: 0 0 0 0 rgba(228, 240, 254, 0.7);
+  }
+  50% {
+    transform: scale(1.2);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 10px rgba(178, 212, 252, 0);
+  }
+  100% {
+    transform: scale(0.8);
+    background-color: #e8f1fc;
+    box-shadow: 0 0 0 0 rgba(246, 250, 255, 0.7);
+  }
 }
