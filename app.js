@@ -67,8 +67,8 @@ io.on("connection", (socket) => {
                let result = checkResult(roomValues[roomName][0], roomValues[roomName][1]);
 
                io.to(roomName).emit("checkResult", {
-                    player1: roomValues[roomName][0].id,
-                    player2: roomValues[roomName][1].id,
+                    player1: roomValues[roomName][0],
+                    player2: roomValues[roomName][1],
                     result
                });                
 

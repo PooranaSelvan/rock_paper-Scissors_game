@@ -201,7 +201,8 @@ button{
      flex-wrap: wrap;
      align-items: center;
      justify-content: center;
-     gap: 20px;    
+     gap: 50px;
+     margin-bottom: 50px;
 }
 #outputPlayers > div {
      display: flex;

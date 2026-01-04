@@ -7,6 +7,7 @@ let restart = document.getElementById("restart");
 let restartBtn = document.getElementById("restart-btn");
 let exitBtn = document.getElementById("exit-btn");
 let outputSelection = document.getElementById("outputSelection1");
+let computerOutput = document.getElementById("outputComputer");
 
 
 // Socket Buttons
@@ -65,22 +66,29 @@ clientSocket.on("roomJoined", (room) => {
      modeContainer.style.display = "none";
      outputContainer.style.display = "flex";
      restart.style.display = "flex";
-     document.getElementById("outputComputer").style.display = "none";
+     document.getElementById("outputComputer").style.display = "flex";
      exitBtn.innerText = "Leave Room";
+     restartBtn.style.display = "none";
 
      roomName = room;
      Notiflix.Notify.success("Joined a Room!");
 });
 // Validate result
 clientSocket.on("checkResult", ({ player1, player2, result }) => {
-     outputPlayer1.innerHTML = "";
+     if(clientSocket.id === player1.id){
+          let player2Element = document.querySelector("." + player2.value).cloneNode(true);
+          computerOutput.append(player2Element);
+     } else {
+          let player1Element = document.querySelector("." + player1.value).cloneNode(true);
+          computerOutput.append(player1Element);
+     }
 
      // console.log(player1, player2, result);
 
      if(result === "draw"){
           finalOutput.style.color = "#ffaa00";
           finalOutput.innerText = "Draw !!";
-     } else if((result === "player1" && clientSocket.id === player1) || (result === "player2" && clientSocket.id === player2)){
+     } else if((result === "player1" && clientSocket.id === player1.id) || (result === "player2" && clientSocket.id === player2.id)){
          finalOutput.style.color = "deepskyblue";
          finalOutput.innerText = "You Won";
      } else {
@@ -88,7 +96,7 @@ clientSocket.on("checkResult", ({ player1, player2, result }) => {
          finalOutput.innerText = "You Lose";
      }
 
-     calculatePlayerScore(result, clientSocket.id === player1);
+     calculatePlayerScore(result, clientSocket.id === player1.id);
      outputSelection.addEventListener("click", userSelect);
      document.getElementById("loader-container").style.display = "none";
 });
