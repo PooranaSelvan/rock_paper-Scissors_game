@@ -64,7 +64,6 @@ button{
      justify-content: center;
      flex-direction: column;
      gap: 10px;
-     margin-top: 30px; 
      color: black;
 }
 #rooms div {
@@ -149,7 +148,7 @@ button{
      display: flex;
      flex-wrap: wrap;
      align-items: center;
-     justify-content: space-evenly;
+     justify-content: space-around;
      gap: 20px;
      width: 80%;
      margin-top: 50px;
@@ -159,7 +158,83 @@ button{
      padding: 50px;
      border-radius: 5px;
 }
-
+#available-rooms {
+     text-align: center;
+     color: black;
+     height: 250px;
+     width: 500px;
+}
+#a-rooms {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     gap: 20px;
+     width: 100%;
+     height: 120px;
+     overflow: auto;
+}
+#a-rooms::-webkit-scrollbar {
+     width: 6px;
+}
+#a-rooms::-webkit-scrollbar-track {
+     background: #f1f1f1;
+     border-radius: 10px;
+}
+#a-rooms::-webkit-scrollbar-thumb {
+     background: #c1c1c1;
+     border-radius: 10px;
+}
+#a-rooms::-webkit-scrollbar-thumb:hover {
+     background: #a8a8a8;
+}
+.room {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+     background-color: #dee0ee;
+     border-radius: 5px;
+     padding: 10px 30px;
+}
+.room h1 {
+     font-size: 34px;
+}
+.room p {
+     font-size: 14px;
+}
+.room hr {
+     height: 2px;
+     width: 100%;
+     background-color: black;
+     border: none;
+     border-radius: 12px;
+     margin: 5px 0;
+}
+.room-wrapper {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     justify-content: space-around;
+     gap: 20px;
+     width: 100%;
+}
+.room-wrapper p {
+     display: flex;
+     flex-wrap: wrap;
+     align-items: center;
+     gap: 5px;
+}
+.room-wrapper button {
+     padding: 0;
+     background: transparent;
+     font-size: 22px;
+     transition: all 0.3s ease-in-out;
+}
+.room-wrapper button:hover {
+     transform: scale(1.1) rotate(5deg);
+}
 
 /* Output Container */
 #outputContainer{

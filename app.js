@@ -20,9 +20,11 @@ let roomValues = {};
 
 io.on("connection", (socket) => {
      console.log("User is Connected", socket.id);
+     io.emit("userRooms", getRooms());
 
      socket.on("disconnect", () => {
           console.log("User is Disconnected", socket.id);
+          io.emit("userRooms", getRooms());
      });
 
      socket.on("joinRoom", (room) => {
@@ -31,16 +33,17 @@ io.on("connection", (socket) => {
           //      return;
           // }
           
-          socket.join(room);
           const roomSize = io.sockets.adapter.rooms.get(room)?.size || 0;
 
-          if (roomSize > 2) {
-               socket.leave(room); 
+          if (roomSize >= 2) {
                socket.emit("roomFull");
-          } else {
-               console.log(`${socket.id} joined room ${room}`);
-               socket.emit("roomJoined", room);
+               return;
           }
+
+          socket.join(room);
+          console.log(`${socket.id} joined room ${room}`);
+          socket.emit("roomJoined", room);
+          io.emit("userRooms", getRooms());
      });        
 
      socket.on("action", ({value, roomName}) => {
@@ -78,8 +81,28 @@ io.on("connection", (socket) => {
 
      socket.on("leaveRoom", (roomName) => {
           socket.leave(roomName);
+          io.emit("userRooms", getRooms());
      });
 });
+
+
+function getRooms(){
+     let sids = io.sockets.adapter.sids;
+     let rooms = io.sockets.adapter.rooms;
+     let userRooms = [];
+
+     for (let [roomName, members] of rooms) {
+          if(!sids.has(roomName)){
+               userRooms.push({
+                    room : roomName,
+                    size : members.size
+               });
+          }
+     }
+
+     // console.log(userRooms);
+     return userRooms;
+}
 
 const checkResult = (playerOneInput, playerTwoInput) => {
      playerOneInput = playerOneInput.value;

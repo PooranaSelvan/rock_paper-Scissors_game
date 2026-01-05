@@ -8,6 +8,7 @@ let restartBtn = document.getElementById("restart-btn");
 let exitBtn = document.getElementById("exit-btn");
 let outputSelection = document.getElementById("outputSelection1");
 let computerOutput = document.getElementById("outputComputer");
+let availableRooms = document.getElementById("a-rooms");
 
 
 // Socket Buttons
@@ -75,6 +76,7 @@ clientSocket.on("roomJoined", (room) => {
 });
 // Validate result
 clientSocket.on("checkResult", ({ player1, player2, result }) => {
+     computerOutput.innerHTML = "";
      if(clientSocket.id === player1.id){
           let player2Element = document.querySelector("." + player2.value).cloneNode(true);
           computerOutput.append(player2Element);
@@ -108,8 +110,67 @@ clientSocket.on("roomFull", () => {
 });
 clientSocket.on("roomNotFound", () => {
      Notiflix.Notify.failure("Room Not Found!");
-})
-   
+});
+clientSocket.on("userRooms", (rooms) => {
+     if(rooms.length < 1){
+          availableRooms.innerText = "No Available Rooms Found!";
+          return;
+     }
+
+     availableRooms.innerHTML = "";
+
+     let arr = rooms.filter(ele => ele.size < 2);
+
+     if (arr.length === 0) {
+          availableRooms.innerText = "No Available Rooms Found!";
+          return;
+     }
+
+     for(let i = 0; i < arr.length; i++){
+          let div = document.createElement("div");
+          div.className = arr[i].room;
+          div.classList.add("room");
+          
+          let localRoomName = document.createElement("h1");
+          localRoomName.innerHTML = arr[i].room;
+
+          let roomMsg = document.createElement("p");
+          roomMsg.innerText = "ROOM CODE";
+
+          let roomLine = document.createElement("hr");
+
+          let roomSize = document.createElement("p");
+          roomSize.innerHTML = '<i class="fa-solid fa-users"></i> ';
+          roomSize.innerHTML += arr[i].size;
+
+          let joinBtn = document.createElement("button");
+          joinBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i>';
+          joinBtn.className = "a-room-btn";
+
+          let roomWrapper = document.createElement("div");
+          roomWrapper.className = "room-wrapper";
+
+          roomWrapper.append(roomSize, joinBtn);
+
+          div.append(localRoomName, roomMsg, roomLine, roomWrapper);
+
+          availableRooms.append(div);
+     }
+
+     document.querySelectorAll(".a-room-btn").forEach(ele => {
+          ele.removeEventListener("click", joinUserRoom);
+     });
+
+
+     document.querySelectorAll(".a-room-btn").forEach(ele => {
+          ele.addEventListener("click", (e) => {
+               let rName = e.target.parentElement.parentElement.parentElement.className.split(" ")[0];
+               roomName = rName;
+               joinUserRoom();
+          });
+     });
+});
+
 outputSelection.addEventListener("click", userSelect);
 
 function userSelect(e) {
@@ -240,8 +301,9 @@ restartBtn.addEventListener("click", () => {
 
 
 exitBtn.addEventListener("click", () => {
-     leaveRoom();
-
+     if(mode === 2){
+          leaveRoom();
+     }
 
      player1Score = 0;
      player2Score = 0;
