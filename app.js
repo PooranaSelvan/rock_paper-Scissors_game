@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
+import checkResult from "./utils/checkResult.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +42,14 @@ io.on("connection", (socket) => {
           }
 
           socket.join(room);
+
+          if(io.sockets.adapter.rooms.get(room)?.size === 2){
+               console.log(io.sockets.adapter.rooms.get(room)?.size, "Room Name : ", room);
+               io.to(room).emit("showOutput");
+          } else if (io.sockets.adapter.rooms.get(room)?.size === 1) {
+               socket.emit("waitingForOpponent");
+          }
+
           console.log(`${socket.id} joined room ${room}`);
           socket.emit("roomJoined", room);
           io.emit("userRooms", getRooms());
@@ -63,8 +72,6 @@ io.on("connection", (socket) => {
                id : socket.id,
                value
           });
-
-          // console.log(roomValues[roomName][0]);
 
           if(roomValues[roomName].length === 2){
                let result = checkResult(roomValues[roomName][0], roomValues[roomName][1]);
@@ -102,37 +109,6 @@ function getRooms(){
 
      // console.log(userRooms);
      return userRooms;
-}
-
-const checkResult = (playerOneInput, playerTwoInput) => {
-     playerOneInput = playerOneInput.value;
-     playerTwoInput = playerTwoInput.value;
-
-     if(playerOneInput === playerTwoInput){
-          return "draw";
-     }
-
-     if (playerOneInput === "rock" && (playerTwoInput === "scissors" || playerTwoInput === "lizard")) {
-          return "player1";
-     }
-     
-     if (playerOneInput === "paper" && (playerTwoInput === "rock" || playerTwoInput === "spock")) {
-          return "player1";
-     }
-     
-     if (playerOneInput === "scissors" && (playerTwoInput === "paper" || playerTwoInput === "lizard")) {
-          return "player1";
-     }
-     
-     if (playerOneInput === "lizard" && (playerTwoInput === "paper" || playerTwoInput === "spock")) {
-          return "player1";
-     }
-     
-     if (playerOneInput === "spock" && (playerTwoInput === "scissors" || playerTwoInput === "rock")) {
-          return "player1";
-     }
-     
-     return "player2";
 }
 
 

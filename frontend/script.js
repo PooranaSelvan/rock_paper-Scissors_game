@@ -16,6 +16,7 @@ let createRoom = document.getElementById("create-btn");
 let joinRoom = document.getElementById("join-btn");
 let joinRoomInput = document.getElementById("join-room-input");
 let roomContainer = document.getElementById("roomName");
+let loadContainer = document.getElementById("loader-container");
 
 
 let player1Score = 0;
@@ -35,8 +36,9 @@ createRoom.addEventListener("click", () => {
      roomName = "";
 
      for(let i = 0; i < 5; i++){
-          roomName += Math.floor(Math.random() * 5) * 1;
+          roomName += Math.floor(Math.random() * 5);
      }
+     // console.log(roomName);
 
      joinUserRoom();
 });
@@ -65,14 +67,18 @@ function leaveRoom(){
 // Afteer Joined
 clientSocket.on("roomJoined", (room) => {
      modeContainer.style.display = "none";
-     outputContainer.style.display = "flex";
-     restart.style.display = "flex";
+     exitBtn.style.display = "flex";
+     
      document.getElementById("outputComputer").style.display = "flex";
-     exitBtn.innerText = "Leave Room";
      restartBtn.style.display = "none";
 
      roomName = room;
      Notiflix.Notify.success("Joined a Room!");
+});
+// Show Output
+clientSocket.on("showOutput", () => {
+     outputContainer.style.display = "flex";
+     loadContainer.style.display = "none";
 });
 // Validate result
 clientSocket.on("checkResult", ({ player1, player2, result }) => {
@@ -100,7 +106,6 @@ clientSocket.on("checkResult", ({ player1, player2, result }) => {
 
      calculatePlayerScore(result, clientSocket.id === player1.id);
      outputSelection.addEventListener("click", userSelect);
-     document.getElementById("loader-container").style.display = "none";
 });
 clientSocket.on("roomFull", () => {
      console.log("Room Full!");
@@ -170,6 +175,11 @@ clientSocket.on("userRooms", (rooms) => {
           });
      });
 });
+clientSocket.on("waitingForOpponent", () => {
+     loadContainer.style.display = "flex";
+     outputContainer.style.display = "none";
+});
+
 
 outputSelection.addEventListener("click", userSelect);
 
@@ -205,7 +215,6 @@ function userSelect(e) {
           });
      
           outputSelection.removeEventListener("click", userSelect);
-          document.getElementById("loader-container").style.display = "flex";
           outputPlayer1.append(sendTo.cloneNode(true));
      }
 }
@@ -271,13 +280,13 @@ oneplayerMode.addEventListener("click", () => {
      modeContainer.style.display = "none";
      outputContainer.style.display = "flex";
      restart.style.display = "flex";
+     exitBtn.style.display = "flex";
      roomContainer.innerText = "SINGLE PLAYER MODE";
      mode = 1;
      document.getElementById("playerOneOutputContainer").style.flexDirection = "column";
      document.getElementById("outputComputer").style.display = "flex";
      outputSelection.addEventListener("click", userSelect);
      Notiflix.Notify.success("Match Started!");
-     exitBtn.innerText = "Exit Game";
 });
 
 
